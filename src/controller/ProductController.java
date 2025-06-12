@@ -21,4 +21,16 @@ public class ProductController {
     public boolean deleteByUuid(String uuid) {
         return productService.deleteByUuid(uuid);
     }
+
+    public void insertMultiProduct(Long numberOfProducts){
+        productService.insertMultiProducts(numberOfProducts);
+    }
+
+    public List<ProductResponseDto> readMultiProduct(){
+        return productService.readMultiProducts();
+    }
+
+    public void clearAllProducts(){
+        productService.clearAllProducts();
+    }
 }

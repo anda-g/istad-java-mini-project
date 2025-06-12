@@ -1,12 +1,15 @@
 package model.repository;
 
+import com.github.javafaker.Faker;
 import model.entites.Category;
 import model.entites.Product;
 import utils.DatabaseConfig;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ProductRepository implements Repository<Product, Integer> {
     @Override
@@ -118,6 +121,73 @@ public class ProductRepository implements Repository<Product, Integer> {
             return true;
         }
         return false;
+    }
+
+    public void insertMultiProducts(Long numbersOfProducts){
+        String sql = """
+                INSERT INTO products (uuid, product_name, price, quantity, is_deleted, category)
+                VALUES ( ?, ?, ?, ?, FALSE, ?)
+                """;
+        try(Connection conn = DatabaseConfig.getConnection()){
+            PreparedStatement ps = conn.prepareStatement(sql);
+            conn.setAutoCommit(false);
+            Faker faker = new Faker();
+            for(int i = 0; i < numbersOfProducts; i++){
+                String productName = faker.commerce().productName();
+                String price = faker.commerce().price();
+                int qty = faker.random().nextInt(50,100);
+                Category category = faker.random().nextBoolean() ? Category.FOOD : Category.DRINK;
+                ps.setString(1, UUID.randomUUID().toString());
+                ps.setString(2, productName);
+                ps.setDouble(3, Double.parseDouble(price));
+                ps.setInt(4, qty);
+                ps.setString(5, category.toString());
+                ps.addBatch();
+
+                if(i % 1000 == 0){
+                    ps.executeBatch();
+                    conn.commit();
+
+                }
+
+            }
+            ps.executeBatch();
+            conn.commit();
+            System.out.println("Inserted " + numbersOfProducts + " products");
+        } catch (SQLException e) {
+            System.out.println("[!] Error while inserting a lot products: " + e.getMessage());
+        }
+    }
+
+    public List<Product> readMultiProducts(){
+        String sql = """
+                SELECT * FROM products
+                WHERE is_deleted = FALSE
+                """;
+        try(Connection conn = DatabaseConfig.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setFetchSize(1000);
+            ResultSet rs = ps.executeQuery();
+            List<Product> products = new ArrayList<>();
+            while (rs.next()) {
+                products.add(getProduct(rs));
+            }
+            return products;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void clearAll(){
+        String sql = """
+                TRUNCATE TABLE products
+                """;
+        try(Connection conn = DatabaseConfig.getConnection()) {
+            Statement stmt = conn.createStatement();
+            System.out.println(stmt.executeUpdate(sql) + " Rows deleted");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Product getProduct(ResultSet rs) throws SQLException {

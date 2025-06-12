@@ -1,5 +1,6 @@
 package mapper;
 
+import model.dto.ProductCartDto;
 import model.dto.ProductCreateDto;
 import model.dto.ProductResponseDto;
 import model.entites.Product;

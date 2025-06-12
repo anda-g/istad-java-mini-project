@@ -168,6 +168,7 @@ public class UserRepository implements Repository<User, Integer> {
         user.setUuid(rs.getString("uuid"));
         user.setUsername(rs.getString("username"));
         user.setEmail(rs.getString("email"));
+        user.setPassword(rs.getString("password"));
         user.setRole(rs.getString("role"));
         return user;
     }

@@ -44,4 +44,21 @@ public class ProductServiceImpl implements ProductService {
     public Boolean deleteByUuid(String uuid) {
         return productRepository.deleteByUuid(uuid);
     }
+
+    public void insertMultiProducts(Long numberOfProducts) {
+        productRepository.insertMultiProducts(numberOfProducts);
+    }
+
+    public void clearAllProducts() {
+        productRepository.clearAll();
+    }
+
+    public List<ProductResponseDto> readMultiProducts() {
+        List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
+        for (Product product : productRepository.readMultiProducts()) {
+            ProductResponseDto productResponseDto = ProductMapper.mapProductToProductResponseDto(product);
+            productResponseDtoList.add(productResponseDto);
+        }
+        return productResponseDtoList;
+    }
 }
