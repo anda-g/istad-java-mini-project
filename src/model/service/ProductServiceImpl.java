@@ -3,6 +3,7 @@ package model.service;
 import mapper.ProductMapper;
 import model.dto.ProductCreateDto;
 import model.dto.ProductResponseDto;
+import model.dto.ProductUpdateDto;
 import model.entites.Product;
 import model.repository.ProductRepository;
 
@@ -53,9 +54,9 @@ public class ProductServiceImpl implements ProductService {
         productRepository.clearAll();
     }
 
-    public List<ProductResponseDto> readMultiProducts() {
+    public List<ProductResponseDto> readMultiProducts(Long numberOfProducts) {
         List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
-        for (Product product : productRepository.readMultiProducts()) {
+        for (Product product : productRepository.readMultiProducts(numberOfProducts)) {
             ProductResponseDto productResponseDto = ProductMapper.mapProductToProductResponseDto(product);
             productResponseDtoList.add(productResponseDto);
         }
@@ -71,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
             });
             return productResponseDtoList;
         }
-        return productResponseDtoList;
+        return null;
     }
 
     public List<ProductResponseDto> filterByCategory(String category) {
@@ -84,5 +85,9 @@ public class ProductServiceImpl implements ProductService {
             return productResponseDtoList;
         }
         return productResponseDtoList;
+    }
+
+    public Boolean updateProductByUuid(String uuid, ProductUpdateDto productUpdateDto) {
+        return productRepository.updateProductByUuid(uuid, productUpdateDto);
     }
 }

@@ -1,57 +1,80 @@
-# Java Project with Manual JAR Dependencies
+# 📦 ISTAD Java Mini Project - Group 2
 
-This is a simple Java project that uses external libraries (JAR files) stored in the `lib/` folder. You need to manually add these libraries to your IDE after cloning the project.
+This is a mini Java console application developed by students of **ISTAD Group 2**. The project uses PostgreSQL as its database and demonstrates a simple Product & User Management System with input validation and role-based access (admin/user).
 
-## 📁 Project Structure
+## 👨‍💻 Team Members
 
-```shell
-MyJavaProject/
-├── src/              # Your Java source code
-│   └── Main.java
-├── lib/              # Folder containing JAR dependencies
-│   ├── gson.jar
-│   └── mysql-connector-java.jar
+- Leng Narak (Leader)
+- Tong Bora
+- Kong Sisovandara
+- But Seavthong
+- Kung Sovannda
+- Khim Sokha
+- Sorn Sophamarinet
+
+**🧑‍🏫 Mentor**: Kim Chansokpheng
+
+## 🗂️ Project Structure
+
+```
+mini-project/
+├── src/
+│   ├── repository/        # Repositories (Interfaces + Implementations)
+│   ├── service/           # Services (Interfaces + Implementations)
+│   ├── utils/             # Utility classes (e.g., InputValidator)
+│   ├── view/              # UI and Console Interaction
+│   ├── Main.java          # Entry point
+│   └── config.properties      # Database config file
+├── lib/                   # External JAR dependencies (if any)
+│   └── ...                # Example: postgresql.jar
+├── user.properties        # User login/session config
 ├── README.md
+└── mini-project.iml       # IntelliJ Project File
 ```
 
-## 🛠 Requirements
+## 🔧 Requirements
 
 - Java Development Kit (JDK 8 or later)
 - IntelliJ IDEA or Eclipse IDE
 
+
 ## 🚀 How to Run the Project
 
-✅ 1. Clone the Repository
+### ✅ 1. Clone the Repository
 
-```shell
+```bash
 git clone https://github.com/anda-g/istad-java-mini-project.git
-```
-```shell
-cd your-project
+cd istad-java-mini-project
 ```
 
-✅ 2. Open the Project in Your IDE
+### ✅ 2. Open the Project in IntelliJ or Eclipse
 
-Open the project folder in IntelliJ IDEA or Eclipse.
+- Open the folder as a new project.
+- Make sure your IDE is using Java 8+.
 
-✅ 3. Add JARs from the `lib/` Folder
+### ✅ 3. Add JAR Dependencies (if using external JARs)
 
-For IntelliJ IDEA:
-1. Go to File → Project Structure → Modules → Dependencies.
-2. Click the + icon → choose "JARs or directories".
-3. Select all the `.jar` files inside the `lib/` folder.
-4. Choose "Classes" when prompted.
-5. Click OK or Apply to finish.
+**For IntelliJ:**
 
-For Eclipse:
-1. Right-click your project → Build Path → Configure Build Path.
-2. Go to the Libraries tab.
-3. Click "Add JARs..." (if `lib/` is inside the project).
-4. Select the JAR files from the `lib/` folder.
-5. Click Apply and Close.
+- `File → Project Structure → Modules → Dependencies`
+- Click ➕ → "JARs or directories" → Select from `lib/`
+- Apply changes
 
-✅ 4. Run the Project
+**For Eclipse:**
 
-Now you can run the project normally.
+- `Right-click project → Build Path → Configure Build Path → Libraries`
+- Click "Add JARs..." and select from `lib/`
 
-## NOTE: USE ROLE = `admin` WHEN REGISTER TO GET ADMIN ACCOUNT
+### ✅ 4. Run the Main Class
+
+Find `Main.java` in the `src/view/` or root `src/` folder and run it.
+
+## 🔑 Notes
+
+- ✅ **Use role `admin` during registration to get admin access.**
+- All inputs are validated using the custom `InputValidator` utility.
+- Colored console outputs are used for better readability.
+
+## ❤️ Special Thanks
+
+To our instructor **Kim Chansokpheng** and the ISTAD team for the guidance and support.

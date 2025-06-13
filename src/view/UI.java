@@ -4,6 +4,7 @@ import controller.UserController;
 import model.dto.UserCreateDto;
 import model.dto.UserLoginDto;
 import model.dto.UserResponseDto;
+import utils.InputValidator;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,7 +16,6 @@ import java.util.Scanner;
 public class UI {
     private static UserResponseDto user;
     private static final UserController userController = new UserController();
-    private static final Scanner sc = new Scanner(System.in);
 
     private static final String RESET = "\033[0m";
     private static final String RED = "\033[0;31m";
@@ -34,13 +34,8 @@ public class UI {
             do {
                 authUser();
             } while (user == null);
-
-            if (user.role().equals("admin")) {
-                new ProductView().adminMode(user);
-                user = null;
-            } else {
-                new ProductView().userMode(user);
-            }
+            new Operate(user);
+            user = null;
         } while (true);
     }
 
@@ -71,19 +66,15 @@ public class UI {
         System.out.println(BLUE + "1. Login to existing account");
         System.out.println("2. Register new account");
         System.out.println("3. Exit system" + RESET);
-        System.out.print(BOLD + "\nEnter your choice (1-3): " + RESET);
 
-        int choice = sc.nextInt();
-        sc.nextLine();
+        int choice = InputValidator.getInt(BOLD + "\nEnter your choice (1-3): " + RESET);
         String uuid;
 
         switch (choice) {
             case 1 -> {
                 System.out.println("\n" + CYAN + BOLD + "=== USER LOGIN ===" + RESET);
-                System.out.print("Enter email: ");
-                String email = sc.nextLine();
-                System.out.print("Enter password: ");
-                String password = sc.nextLine();
+                String email = InputValidator.getEmail("Enter email: ");
+                String password = InputValidator.getString("Enter password: ");
 
                 UserLoginDto userLoginDto = new UserLoginDto(email, password);
                 user = userController.login(userLoginDto);
@@ -100,14 +91,10 @@ public class UI {
                 System.out.println("\n" + CYAN + BOLD + "=== USER REGISTRATION ===" + RESET);
                 System.out.println("Please provide the following information:");
 
-                System.out.print("Username: ");
-                String username = sc.nextLine();
-                System.out.print("Email: ");
-                String email = sc.nextLine();
-                System.out.print("Password: ");
-                String password = sc.nextLine();
-                System.out.print("Role (user/admin): ");
-                String role = sc.nextLine();
+                String username = InputValidator.getString("Username: ");
+                String email = InputValidator.getEmail("Email: ");
+                String password = InputValidator.getString("Password: ");
+                String role = InputValidator.getString("Role (user/admin): ");
 
                 UserCreateDto userCreateDto = new UserCreateDto(username, email, password, role);
                 user = userController.register(userCreateDto);

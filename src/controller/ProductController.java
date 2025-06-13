@@ -2,6 +2,7 @@ package controller;
 
 import model.dto.ProductCreateDto;
 import model.dto.ProductResponseDto;
+import model.dto.ProductUpdateDto;
 import model.service.ProductServiceImpl;
 
 import java.util.List;
@@ -26,8 +27,8 @@ public class ProductController {
         productService.insertMultiProducts(numberOfProducts);
     }
 
-    public List<ProductResponseDto> readMultiProduct(){
-        return productService.readMultiProducts();
+    public List<ProductResponseDto> readMultiProduct(Long numberOfProducts) {
+        return productService.readMultiProducts(numberOfProducts);
     }
 
     public void clearAllProducts(){
@@ -38,5 +39,8 @@ public class ProductController {
     }
     public List<ProductResponseDto> filterByCategory(String category){
         return productService.filterByCategory(category);
+    }
+    public Boolean updateProductByUuid(String uuid, ProductUpdateDto productUpdateDto){
+        return productService.updateProductByUuid(uuid, productUpdateDto);
     }
 }

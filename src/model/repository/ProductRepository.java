@@ -1,6 +1,7 @@
 package model.repository;
 
 import com.github.javafaker.Faker;
+import model.dto.ProductUpdateDto;
 import model.entites.Category;
 import model.entites.Product;
 import utils.DatabaseConfig;
@@ -159,13 +160,15 @@ public class ProductRepository implements Repository<Product, Integer> {
         }
     }
 
-    public List<Product> readMultiProducts(){
+    public List<Product> readMultiProducts(Long numbersOfProducts){
         String sql = """
                 SELECT * FROM products
                 WHERE is_deleted = FALSE
+                LIMIT ?
                 """;
         try(Connection conn = DatabaseConfig.getConnection()) {
             PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setLong(1, numbersOfProducts);
             ps.setFetchSize(1000);
             ResultSet rs = ps.executeQuery();
             List<Product> products = new ArrayList<>();
@@ -192,11 +195,10 @@ public class ProductRepository implements Repository<Product, Integer> {
 
     public List<Product> searchProductByName(String name){
         String sql = """
-                    SELECT * FROM products 
+                    SELECT * FROM products
                     WHERE product_name ILIKE ? AND is_deleted = FALSE""";
         List<Product> products = new ArrayList<>();
         try(Connection con = DatabaseConfig.getConnection()){
-            assert con != null;
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1,  name + "%");
             ResultSet rs = ps.executeQuery();
@@ -207,7 +209,7 @@ public class ProductRepository implements Repository<Product, Integer> {
         }catch (Exception e){
             System.out.println("Error during search product by name: " + e.getMessage());
         }
-        return List.of();
+        return null;
     }
 
     public List<Product> filterByCategory(String category){
@@ -228,6 +230,28 @@ public class ProductRepository implements Repository<Product, Integer> {
             System.out.println("[!] Error while filtering products: " + e.getMessage());
         }
         return null;
+    }
+
+    public Boolean updateProductByUuid(String uuid, ProductUpdateDto productUpdateDto){
+        Product product = findByUuid(uuid);
+        if(product != null){
+            String sql = """
+                    UPDATE products
+                    SET product_name = ?, price = ?, quantity = ?
+                    WHERE id = ?
+                    """;
+            try(Connection conn = DatabaseConfig.getConnection()){
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, productUpdateDto.name());
+                ps.setDouble(2, productUpdateDto.price());
+                ps.setInt(3, productUpdateDto.qty());
+                ps.setInt(4, product.getId());
+                return ps.executeUpdate() > 0;
+            } catch (SQLException e) {
+                System.out.println("[!] Error while updating product by uuid: " + e.getMessage());
+            }
+        }
+        return false;
     }
 
     public Product getProduct(ResultSet rs) throws SQLException {
