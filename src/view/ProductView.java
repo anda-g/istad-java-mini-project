@@ -91,7 +91,7 @@ public class ProductView {
                     } else {
                         System.out.println("\n" + BLUE + BOLD + "YOUR ORDER SUMMARY" + RESET);
                         productOrderDisplay(productCart);
-                        System.out.print("You want to order (y/n): ");
+                        System.out.print(BOLD + BOLD + "You want to order (y/n): ");
                         String c = sc.next().toLowerCase();
                         if (c.charAt(0) == 'y') {
                             List<String> productUuids = new ArrayList<>();
@@ -124,6 +124,7 @@ public class ProductView {
                     System.exit(0);
                 }
             }
+            System.out.print("\n" + CYAN + "Press Enter to continue..." + RESET); sc.nextLine();
         } while (true);
     }
 
@@ -142,7 +143,7 @@ public class ProductView {
         for (ProductResponseDto product : products) {
             double subTotal = product.price() * product.quantity();
             total += subTotal;
-            System.out.printf("%-30s %-10.2f$ %-10s %-10.2f$\n", product.name(), product.price(), product.quantity(), subTotal);
+            System.out.printf("%-30s $%-10.2f %-10s $%-10.2f\n", product.name(), product.price(), product.quantity(), subTotal);
         }
         System.out.println("------------------------------------------------------------");
         System.out.printf("%50s: %d\n",  (GREEN + "Total products" + RESET), products.size());
@@ -170,7 +171,7 @@ public class ProductView {
     }
 
     public void productDisplay(ProductResponseDto product) {
-        System.out.printf("%-40s %-30s %-10.2f$ %-10d %-10s\n", product.uuid(), product.name(), product.price(), product.quantity(), product.category().toString());
+        System.out.printf("%-40s %-30s $%-10.2f %-10d %-10s\n", product.uuid(), product.name(), product.price(), product.quantity(), product.category().toString());
     }
 
     public void adminMode(UserResponseDto user) {
