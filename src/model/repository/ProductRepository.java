@@ -190,6 +190,46 @@ public class ProductRepository implements Repository<Product, Integer> {
         }
     }
 
+    public List<Product> searchProductByName(String name){
+        String sql = """
+                    SELECT * FROM products 
+                    WHERE product_name ILIKE ? AND is_deleted = FALSE""";
+        List<Product> products = new ArrayList<>();
+        try(Connection con = DatabaseConfig.getConnection()){
+            assert con != null;
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1,  name + "%");
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()){
+                products.add(getProduct(rs));
+            }
+            return products;
+        }catch (Exception e){
+            System.out.println("Error during search product by name: " + e.getMessage());
+        }
+        return List.of();
+    }
+
+    public List<Product> filterByCategory(String category){
+        String sql = """
+                SELECT * FROM products 
+                WHERE is_deleted = FALSE AND category ILIKE ?
+                """;
+        try(Connection conn = DatabaseConfig.getConnection()){
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, "%"+category+"%");
+            ResultSet rs = ps.executeQuery();
+            List<Product> products = new ArrayList<>();
+            while (rs.next()) {
+                products.add(getProduct(rs));
+            }
+            return products;
+        } catch (SQLException e) {
+            System.out.println("[!] Error while filtering products: " + e.getMessage());
+        }
+        return null;
+    }
+
     public Product getProduct(ResultSet rs) throws SQLException {
         Product product = new Product();
         product.setId(rs.getInt("id"));

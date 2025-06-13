@@ -61,4 +61,28 @@ public class ProductServiceImpl implements ProductService {
         }
         return productResponseDtoList;
     }
+
+    public List<ProductResponseDto> searchByName(String name) {
+        List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
+        List<Product> products = productRepository.searchProductByName(name);
+        if (products != null) {
+            products.forEach(product -> {
+                productResponseDtoList.add(ProductMapper.mapProductToProductResponseDto(product));
+            });
+            return productResponseDtoList;
+        }
+        return productResponseDtoList;
+    }
+
+    public List<ProductResponseDto> filterByCategory(String category) {
+        List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
+        List<Product> products = productRepository.filterByCategory(category);
+        if (products != null) {
+            products.forEach(product -> {
+                productResponseDtoList.add(ProductMapper.mapProductToProductResponseDto(product));
+            });
+            return productResponseDtoList;
+        }
+        return productResponseDtoList;
+    }
 }

@@ -19,8 +19,11 @@ public class ProductView {
     private final Scanner sc = new Scanner(System.in);
     private final ProductController productController = new ProductController();
     private final UserController userController = new UserController();
-    private List<ProductResponseDto> productCart = new ArrayList<>();
+    private final List<ProductResponseDto> productCart = new ArrayList<>();
     private final OrderController orderController = new OrderController();
+    private final TableUI<ProductResponseDto> productTable = new TableUI<>();
+    private final TableUI<OrderResponseDto> orderTable = new TableUI<>();
+    private final TableUI<UserResponseDto> userTable = new TableUI<>();
 
     private static final String RESET = "\033[0m";
     private static final String RED = "\033[0;31m";
@@ -41,10 +44,7 @@ public class ProductView {
             switch (userMenu()) {
                 case 1 -> {
                     System.out.println("\n" + BLUE + BOLD + "ALL PRODUCTS" + RESET);
-                    productHeadDisplay();
-                    for (ProductResponseDto product : productController.getAllProducts()) {
-                        productDisplay(product);
-                    }
+                    productTable.getTableDisplay(productController.getAllProducts());
                 }
                 case 2 -> {
                     System.out.println("\n" + BLUE + BOLD + "SEARCH PRODUCT" + RESET);
@@ -52,8 +52,7 @@ public class ProductView {
                     String uuid = sc.nextLine();
                     ProductResponseDto product = productController.getProductByUuid(uuid);
                     if (product != null) {
-                        productHeadDisplay();
-                        productDisplay(product);
+                        productTable.getTableDisplay(List.of(product));
                     } else {
                         System.err.println(RED + "✖ Error: Can't find product with uuid " + uuid + RESET);
                     }
@@ -112,14 +111,45 @@ public class ProductView {
                     if (orders.isEmpty()) {
                         System.err.println(RED + "✖ There is no order history" + RESET);
                     }else{
-                        orderHistoryDisplay(orders);
+                        orderTable.getTableDisplay(orders);
                     }
                 }
                 case 6 -> {
+                    System.out.println("\n" + BLUE + BOLD + "FILTER BY CATEGORY" + RESET);
+                    System.out.println(GREEN + "1. FOOD" + RESET);
+                    System.out.println(GREEN + "2. DRINK" + RESET);
+                    System.out.println(GREEN + "3. FRUIT" + RESET);
+                    System.out.print("Enter category (1-3): ");
+                    int cat = sc.nextInt(); sc.nextLine();
+                    String category = "";
+                    switch (cat) {
+                        case 1 -> category = Category.FOOD.getCategory();
+                        case 2 -> category = Category.DRINK.getCategory();
+                        case 3 -> category = Category.FRUIT.getCategory();
+                    }
+                    if(!category.isEmpty()){
+                        List<ProductResponseDto> productResponseDtoList = productController.filterByCategory(category);
+                        productTable.getTableDisplay(productResponseDtoList);
+                    }
+
+                }
+                case 7 -> {
+                    System.out.println("\n" + BLUE + BOLD + "SEARCH PRODUCT BY NAME" + RESET);
+                    System.out.print("Enter product name: ");
+                    String name = sc.nextLine();
+                    List<ProductResponseDto> productResponseDtoList = productController.searchByName(name);
+                    productTable.getTableDisplay(productResponseDtoList);
+
+                }
+                case 8 -> {
+                    System.out.println("\n" + BLUE + BOLD + "USER PROFILE" + RESET);
+                    userTable.getTableDisplay(List.of(user));
+                }
+                case 9 -> {
                     logout();
                     return;
                 }
-                case 7 -> {
+                case 0 -> {
                     System.out.println(YELLOW + "\nThank you for using our system. Goodbye!" + RESET);
                     System.exit(0);
                 }
@@ -128,22 +158,12 @@ public class ProductView {
         } while (true);
     }
 
-    public void orderHistoryDisplay(List<OrderResponseDto> orders) {
-        System.out.println(PURPLE + BOLD + String.format("%-10s %-30s %-10s", "ORDER BY", "PRODUCT NAME", "ORDER DATE") + RESET);
-        System.out.println("---------------------------------------------------");
-        for (OrderResponseDto order : orders) {
-            System.out.printf("%-10s %-30s %-10s\n", order.username(), order.productName(), order.orderDate());
-        }
-    }
-
     public void productOrderDisplay(List<ProductResponseDto> products) {
-        System.out.println(PURPLE + BOLD + String.format("%-30s %-10s %-10s %-10s", "NAME", "PRICE", "QTY", "TOTAL") + RESET);
-        System.out.println("------------------------------------------------------------");
         double total = 0;
+        productTable.getTableDisplay(products);
         for (ProductResponseDto product : products) {
             double subTotal = product.price() * product.quantity();
             total += subTotal;
-            System.out.printf("%-30s $%-10.2f %-10s $%-10.2f\n", product.name(), product.price(), product.quantity(), subTotal);
         }
         System.out.println("------------------------------------------------------------");
         System.out.printf("%50s: %d\n",  (GREEN + "Total products" + RESET), products.size());
@@ -153,26 +173,21 @@ public class ProductView {
     public Integer userMenu() {
         System.out.println(BLUE + BOLD + "\nPlease select an option:" + RESET);
         System.out.println("1. View All Products");
-        System.out.println("2. Search Product");
+        System.out.println("2. Search Product By Uuid");
         System.out.println("3. Add to Cart");
         System.out.println("4. View Cart/Order");
         System.out.println("5. View Order History");
-        System.out.println("6. Logout");
-        System.out.println("7. Exit");
-        System.out.print(BOLD + "Enter your choice (1-6): " + RESET);
+        System.out.println("6. Filter By Category");
+        System.out.println("7. Search Product By Name");
+        System.out.println("8. View User Profile");
+        System.out.println("9. Logout");
+        System.out.println("0. Exit");
+        System.out.print(BOLD + "Enter your choice (0-9): " + RESET);
         int option = sc.nextInt();
         sc.nextLine();
         return option;
     }
 
-    public void productHeadDisplay() {
-        System.out.println(PURPLE + BOLD + String.format("%-40s %-30s %-10s %-10s %-10s", "UUID", "NAME", "PRICE", "QTY", "CATEGORY") + RESET);
-        System.out.println("--------------------------------------------------------------------------------------------------");
-    }
-
-    public void productDisplay(ProductResponseDto product) {
-        System.out.printf("%-40s %-30s $%-10.2f %-10d %-10s\n", product.uuid(), product.name(), product.price(), product.quantity(), product.category().toString());
-    }
 
     public void adminMode(UserResponseDto user) {
         System.out.println(CYAN + BOLD + "\n=== ADMIN DASHBOARD ===" + RESET);
@@ -183,10 +198,7 @@ public class ProductView {
             switch (adminMenu()) {
                 case 1 -> {
                     System.out.println("\n" + BLUE + BOLD + "ALL PRODUCTS" + RESET);
-                    productHeadDisplay();
-                    for (ProductResponseDto product : productController.getAllProducts()) {
-                        productDisplay(product);
-                    }
+                    productTable.getTableDisplay(productController.getAllProducts());
                 }
                 case 2 -> {
                     System.out.println("\n" + BLUE + BOLD + "ADD NEW PRODUCT" + RESET);
@@ -212,8 +224,7 @@ public class ProductView {
                     String uuid = sc.nextLine();
                     ProductResponseDto product = productController.getProductByUuid(uuid);
                     if (product != null) {
-                        productHeadDisplay();
-                        productDisplay(product);
+                        productTable.getTableDisplay(List.of(product));
                     } else {
                         System.err.println(RED + "✖ Error: Can't find product with uuid " + uuid + RESET);
                     }
@@ -230,10 +241,7 @@ public class ProductView {
                 }
                 case 5 -> {
                     System.out.println("\n" + BLUE + BOLD + "ALL USERS" + RESET);
-                    userHeadDisplay();
-                    for (UserResponseDto userResponseDto : userController.getAllUsers()) {
-                        userDisplay(userResponseDto);
-                    }
+                    userTable.getTableDisplay(userController.getAllUsers());
                 }
                 case 6 -> {
                     System.out.println("\n" + BLUE + BOLD + "SEARCH USER" + RESET);
@@ -241,8 +249,7 @@ public class ProductView {
                     String uuid = sc.nextLine();
                     UserResponseDto userResponseDto = userController.searchUserByUuid(uuid);
                     if (userResponseDto != null) {
-                        userHeadDisplay();
-                        userDisplay(userResponseDto);
+                        userTable.getTableDisplay(List.of(userResponseDto));
                     } else {
                         System.err.println(RED + "✖ Error: Can't find user with uuid " + uuid + RESET);
                     }
@@ -259,8 +266,7 @@ public class ProductView {
                 }
                 case 8 -> {
                     System.out.println("\n" + BLUE + BOLD + "YOUR PROFILE" + RESET);
-                    userHeadDisplay();
-                    userDisplay(user);
+                    userTable.getTableDisplay(List.of(user));
                 }
                 case 9 -> {
                     logout();
@@ -293,7 +299,7 @@ public class ProductView {
                     if (orders.isEmpty()) {
                         System.err.println(RED + "✖ There is no order history" + RESET);
                     }else{
-                        orderHistoryDisplay(orders);
+                        orderTable.getTableDisplay(orders);
                     }
                 }
                 case 0 -> {
@@ -331,15 +337,6 @@ public class ProductView {
         int option = sc.nextInt();
         sc.nextLine();
         return option;
-    }
-
-    public void userDisplay(UserResponseDto user) {
-        System.out.printf("%-40s %-10s %-12s %-7s\n", user.uuid(), user.username(), user.email(), user.role());
-    }
-
-    public void userHeadDisplay() {
-        System.out.println(PURPLE + BOLD + String.format("%-40s %-10s %-12s %-7s", "UUID", "USERNAME", "EMAIL", "ROLE") + RESET);
-        System.out.println("------------------------------------------------------------");
     }
 
     public void logout(){

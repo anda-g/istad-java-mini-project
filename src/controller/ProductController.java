@@ -33,4 +33,10 @@ public class ProductController {
     public void clearAllProducts(){
         productService.clearAllProducts();
     }
+    public List<ProductResponseDto> searchByName(String name){
+        return productService.searchByName(name);
+    }
+    public List<ProductResponseDto> filterByCategory(String category){
+        return productService.filterByCategory(category);
+    }
 }
