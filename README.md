@@ -54,3 +54,4 @@ For Eclipse:
 
 Now you can run the project normally.
 
+## NOTE: USE ROLE = `admin` WHEN REGISTER TO GET ADMIN ACCOUNT
