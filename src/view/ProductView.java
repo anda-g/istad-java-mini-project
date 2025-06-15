@@ -252,4 +252,56 @@ public class ProductView {
         }
     }
 
+    public static void printInvoice(String brandName, String customerName, List<ProductResponseDto> products) {
+        final int WIDTH = 60;
+        final int NAME_WIDTH = 28;
+        final int PRICE_WIDTH = 10;
+        final int QTY_WIDTH = 5;
+        final int TOTAL_WIDTH = 10;
+
+        final String TOP_BORDER = "╔" + "═".repeat(WIDTH - 2) + "╗";
+        final String BOTTOM_BORDER = "╚" + "═".repeat(WIDTH - 2) + "╝";
+        final String SECTION_BORDER = "╠" + "═".repeat(WIDTH - 2) + "╣";
+        final String LINE_BORDER = "╟" + "─".repeat(WIDTH - 2) + "╢";
+        final String EMPTY_LINE = "║" + " ".repeat(WIDTH - 2) + "║";
+
+        String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
+
+        double grandTotal = products.stream()
+                .mapToDouble(p -> p.price() * p.quantity())
+                .sum();
+
+        System.out.println(TOP_BORDER);
+
+        int brandPadding = (WIDTH - 2 - brandName.length()) / 2;
+        System.out.printf("║%" + (brandPadding + brandName.length()) + "s%" + (WIDTH - 2 - brandPadding - brandName.length()) + "s║%n",
+                brandName, "");
+
+        System.out.println(SECTION_BORDER);
+
+        System.out.printf("║ %-12s: %-43s║%n", "OrderID", UUID.randomUUID());
+        System.out.printf("║ %-12s: %-43s║%n", "Date", currentDate);
+        System.out.printf("║ %-12s: %-43s║%n", "Customer", customerName);
+        System.out.println(SECTION_BORDER);
+
+        System.out.printf("║ %-" + NAME_WIDTH + "s %-" + PRICE_WIDTH + "s %-" + QTY_WIDTH + "s %" + TOTAL_WIDTH + "s ║%n",
+                "PRODUCT", "PRICE", "QTY", "TOTAL");
+        System.out.println(LINE_BORDER);
+
+        for (ProductResponseDto product : products) {
+            String displayName = product.name().length() > NAME_WIDTH
+                    ? product.name().substring(0, NAME_WIDTH - 3) + "..."
+                    : product.name();
+
+            double totalPrice = product.price() * product.quantity();
+
+            System.out.printf("║ %-" + NAME_WIDTH + "s $%-" + (PRICE_WIDTH -1) + ".2f %-" + QTY_WIDTH + "d $%" + (TOTAL_WIDTH -1) + ".2f ║%n",
+                    displayName, product.price(), product.quantity(), totalPrice);
+        }
+
+        System.out.println(SECTION_BORDER);
+        System.out.printf("║%" + (WIDTH - TOTAL_WIDTH - 8) + "sTOTAL: $%" + (TOTAL_WIDTH - 3) + ".2f ║%n", "", grandTotal);
+        System.out.println(BOTTOM_BORDER);
+    }
+
 }
