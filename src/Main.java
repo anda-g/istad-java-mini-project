@@ -1,4 +1,3 @@
-import utils.DatabaseConfig;
 import view.UI;
 
 public class Main {

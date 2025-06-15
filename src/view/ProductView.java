@@ -6,9 +6,14 @@ import model.dto.*;
 import model.entites.Category;
 import utils.InputValidator;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class ProductView {
     private final UserResponseDto user;
@@ -106,22 +111,61 @@ public class ProductView {
         } else {
             System.out.println("\n" + BLUE + BOLD + "YOUR ORDER SUMMARY" + RESET);
             productOrderDisplay(productCart);
-            String c = InputValidator.getString(BOLD + BOLD + "You want to order (y/n): ").toUpperCase();
+            String c = InputValidator.getString(BOLD + BOLD + "You want to order (y/n): " + RESET).toLowerCase();
             if (c.charAt(0) == 'y') {
                 List<String> productUuids = new ArrayList<>();
+
+                System.out.print(BLUE + BOLD + "Preparing your order  ");
+                Thread prepareThread = getThread();
+
                 for (ProductResponseDto responseDto : productCart) {
                     productUuids.add(responseDto.uuid());
                     ProductResponseDto getProduct = productController.getProductByUuid(responseDto.uuid());
-                    ProductUpdateDto productUpdateDto = new ProductUpdateDto( getProduct.name(), getProduct.quantity() - responseDto.quantity(), getProduct.price());
+                    ProductUpdateDto productUpdateDto = new ProductUpdateDto(
+                            getProduct.name(),
+                            getProduct.quantity() - responseDto.quantity(),
+                            getProduct.price()
+                    );
                     productController.updateProductByUuid(responseDto.uuid(), productUpdateDto);
                 }
+
+                prepareThread.interrupt();
+                System.out.println("\b" + GREEN + "✓ Preparation complete!" + RESET);
+
+                System.out.print(BLUE + BOLD + "Creating your order  ");
+                Thread createThread = getThread();
+
                 OrderCreateDto orderCreateDto = new OrderCreateDto(user.uuid(), productUuids, LocalDate.now());
                 orderController.saveOrder(orderCreateDto);
-                System.out.println(GREEN + "Order created successfully!" + RESET);
-                System.out.println(GREEN + BOLD + "Wait for your meals!!" + RESET);
+
+                createThread.interrupt();
+                System.out.println("\b" + GREEN + "✓ Order created successfully!" + RESET);
+
+                printInvoice("ISTAD", user.username(), productCart);
+
+                System.out.println(GREEN + BOLD + "🎉 Your order is being prepared! Thank you for your purchase! 🎉" + RESET);
+                System.out.println(YELLOW + "Estimated delivery time: " + LocalTime.now().plusMinutes(30).format(DateTimeFormatter.ofPattern("HH:mm")) + RESET);
+
                 productCart.clear();
             }
         }
+    }
+
+    private static Thread getThread() {
+        Thread prepareThread = new Thread(() -> {
+            String[] prepareFrames = new String[] {"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"};
+            int prepareCounter = 0;
+            while (!Thread.currentThread().isInterrupted()) {
+                System.out.print("\b" + prepareFrames[prepareCounter++ % prepareFrames.length]);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        });
+        prepareThread.start();
+        return prepareThread;
     }
 
     public void viewOrderHistoryForUser(){
